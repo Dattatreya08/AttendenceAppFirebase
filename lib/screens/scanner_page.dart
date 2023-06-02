@@ -1,13 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer';
 import 'dart:io';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:soham_academy/models/stu_data.dart';
 import 'package:soham_academy/screens/display_student_info.dart';
 import 'package:soham_academy/screens/reverified.dart';
-import 'package:soham_academy/services/remote_services.dart';
-
 class QRViewExample extends StatefulWidget {
   const QRViewExample({Key? key}) : super(key: key);
 
@@ -21,28 +19,6 @@ class _QRViewExampleState extends State<QRViewExample> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   var flashIcon = Icons.flash_off_outlined;
 
-  ApiClient apiClient = ApiClient();
-  List<FinalInfo> studentInfoList = [];
-
-  @override
-  void initState() {
-    super.initState();
-    fetchStudentInfo();
-  }
-
-  Future<void> fetchStudentInfo() async {
-    try {
-      String path =
-          '/mobile_connection.php?action=final_info'; // Replace with your PHP page path
-      List<FinalInfo> result = await apiClient.getFinalInfo(path);
-      setState(() {
-        studentInfoList = result;
-      });
-    } catch (e) {
-      // Handle the error
-      print('Error: $e');
-    }
-  }
 
   @override
   void reassemble() {
@@ -75,104 +51,13 @@ class _QRViewExampleState extends State<QRViewExample> {
         ),
         extendBodyBehindAppBar: true,
         body: _buildQrView(context)
-        // Column(
-        //   children: <Widget>[
-        //     Expanded(flex: 4, child: _buildQrView(context)),
-        //     Expanded(
-        //       flex: 1,
-        //       child: FittedBox(
-        //         fit: BoxFit.contain,
-        //         child: Column(
-        //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //           children: <Widget>[
-        //             // if (result != null)
-        //             //   // Text(
-        //             //   //     'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-        //             //   Padding(
-        //             //     padding: const EdgeInsets.all(20),
-        //             //     child: Text(lisFromString(result!.code)[0]),
-        //             //   )
-        //             // else
-        //             //   const Text('Scan a code'),
-        //
-        //             Row(
-        //               mainAxisAlignment: MainAxisAlignment.center,
-        //               crossAxisAlignment: CrossAxisAlignment.center,
-        //               children: <Widget>[
-        //                 Container(
-        //                   margin: const EdgeInsets.all(8),
-        //                   child: ElevatedButton(
-        //                       onPressed: () async {
-        //                         await controller?.toggleFlash();
-        //                         setState(() {});
-        //                       },
-        //                       child: FutureBuilder(
-        //                         future: controller?.getFlashStatus(),
-        //                         builder: (context, snapshot) {
-        //                           return Text('Flash: ${snapshot.data}');
-        //                         },
-        //                       )),
-        //                 ),
-        //                 Container(
-        //                   margin: const EdgeInsets.all(8),
-        //                   child: ElevatedButton(
-        //                       onPressed: () async {
-        //                         await controller?.flipCamera();
-        //                         setState(() {});
-        //                       },
-        //                       child: FutureBuilder(
-        //                         future: controller?.getCameraInfo(),
-        //                         builder: (context, snapshot) {
-        //                           if (snapshot.data != null) {
-        //                             return Text(
-        //                                 'Camera facing ${describeEnum(snapshot.data!)}');
-        //                           } else {
-        //                             return const Text('loading');
-        //                           }
-        //                         },
-        //                       )),
-        //                 )
-        //               ],
-        //             ),
-        //             Row(
-        //               mainAxisAlignment: MainAxisAlignment.center,
-        //               crossAxisAlignment: CrossAxisAlignment.center,
-        //               children: <Widget>[
-        //                 Container(
-        //                   margin: const EdgeInsets.all(8),
-        //                   child: ElevatedButton(
-        //                     onPressed: () async {
-        //                       await controller?.pauseCamera();
-        //                     },
-        //                     child: const Text('pause',
-        //                         style: TextStyle(fontSize: 20)),
-        //                   ),
-        //                 ),
-        //                 Container(
-        //                   margin: const EdgeInsets.all(8),
-        //                   child: ElevatedButton(
-        //                     onPressed: () async {
-        //                       await controller?.resumeCamera();
-        //                     },
-        //                     child: const Text('resume',
-        //                         style: TextStyle(fontSize: 20)),
-        //                   ),
-        //                 )
-        //               ],
-        //             ),
-        //           ],
-        //         ),
-        //       ),
-        //     ),
-        //   ],
-        // ),
-        );
+    );
   }
 
   Widget _buildQrView(BuildContext context) {
     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
     var scanArea = (MediaQuery.of(context).size.width < 400 ||
-            MediaQuery.of(context).size.height < 400)
+        MediaQuery.of(context).size.height < 400)
         ? 250.0
         : 300.0;
     // To ensure the Scanner view is properly sizes after rotation
@@ -195,37 +80,10 @@ class _QRViewExampleState extends State<QRViewExample> {
       this.controller = controller;
     });
     controller.scannedDataStream.listen((scanData) {
-      setState(() async {
-        result = await scanData;
-        debugPrint(
-            "---->${studentInfoList[int.parse(lisFromString(result!.code)[0])].absentPresent}");
-        if (studentInfoList[int.parse(lisFromString(result!.code)[0]) - 1]
-                .absentPresent ==
-            "0") {
-          updateAbsentPresent(await lisFromString(result!.code)[0], "1");
-          controller?.pauseCamera();
-          await Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) {
-            return DisplayInfo(lisFromString(result!.code)[0],
-                lisFromString(result!.code)![1]);
-          })).then((value) async {
-            await controller?.resumeCamera();
-          });
-        } else if (studentInfoList[
-                    int.parse(lisFromString(result!.code)[0]) - 1]
-                .absentPresent ==
-            "1") {
-          controller?.pauseCamera();
-          await Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) {
-            return Reverified(lisFromString(result!.code)[0],
-                lisFromString(result!.code)![1]);
-          })).then((value) async {
-            await controller?.resumeCamera();
-          });
-        }
-        ;
-      });
+      setState((){
+        result =scanData;
+        processScannedData(lisFromString(result!.code)[0],lisFromString(result!.code)[1]);
+       });
     });
   }
 
@@ -244,26 +102,7 @@ class _QRViewExampleState extends State<QRViewExample> {
     super.dispose();
   }
 
-  void updateAbsentPresent(String studentId, String newAbsentPresentValue) {
-    ApiClient apiClient = ApiClient();
-    Map<String, String> headers = {
-      'Content-Type': 'application/json',
-    };
 
-    Map<String, dynamic> requestBody = {
-      'id': studentId,
-      'absentPresent': newAbsentPresentValue,
-    };
-
-    apiClient
-        .put('/mobile_connection.php/event/schools', headers, requestBody)
-        .then((response) {
-      print('Update successful. Response: $response');
-      // print(jsonDecode(result?.code));
-    }).catchError((error) {
-      print('Error occurred during update: $error');
-    });
-  }
 
   List<String> lisFromString(st) {
     String trimmedString = st.substring(1, st.length - 1);
@@ -276,4 +115,57 @@ class _QRViewExampleState extends State<QRViewExample> {
 
     return resultList;
   }
+
+
+  void processScannedData(String eventID, String participantID) async {
+    // Check if the event ID exists in the 'event' collection
+    DocumentSnapshot eventSnapshot = await FirebaseFirestore.instance
+        .collection('event')
+        .doc(eventID)
+        .get();
+    // Check if the participant ID exists in the 'participant' collection
+    DocumentSnapshot participantSnapshot = await FirebaseFirestore.instance
+        .collection('participant')
+        .doc(participantID)
+        .get();
+
+    if (eventSnapshot.exists && participantSnapshot.exists) {
+      // Check if the 'arrived' field in the 'participant' collection is 0
+      bool isArrived = (participantSnapshot.data() as Map<String, dynamic>)['arrived'] == 1;
+      if (!isArrived) {
+        // Update the 'arrived' field to 1
+        controller!.pauseCamera();
+        await FirebaseFirestore.instance
+            .collection('participant')
+            .doc(participantID)
+            .update({'arrived': 1});
+
+        // Pause the camera and navigate to the next screen
+
+        print("updationSuccessful");
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ConfirmationPage(participantID: participantID)),
+        ).then((value)async{
+           await controller!.resumeCamera();
+        });
+      } else if(isArrived)  {
+        controller!.pauseCamera();
+        print("Already Updated");
+        // Navigate to the reverified screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Reverified(participantID: participantID,)),
+        ).then((value){
+           controller!.resumeCamera();
+        });
+      }
+    } else {
+      // Print error message for event or participant not found
+      controller!.pauseCamera();
+      print('Error: Event or participant not found');
+    }
+  }
+
+
 }

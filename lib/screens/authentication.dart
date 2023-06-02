@@ -91,7 +91,7 @@ class _MyHomeState extends State<MyHome> {
                           _passwordController.text == "Admin") {
                         Navigator.of(context)
                             .push(MaterialPageRoute(builder: (context) {
-                          return DataDisplay();
+                          return SchoolParticipantsPage();
                         }));
                       } else {
                         _userNameController.clear();

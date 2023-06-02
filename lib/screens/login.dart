@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:soham_academy/screens/authentication.dart';
+// import 'package:soham_academy/screens/authentication.dart';
+import 'package:soham_academy/screens/display_schools.dart';
 import 'package:soham_academy/screens/scanner_page.dart';
 class Login extends StatelessWidget {
   Login({Key? key}) : super(key: key);
@@ -27,7 +28,7 @@ class Login extends StatelessWidget {
                 ),
                     onPressed: (){
                       Navigator.push(context, MaterialPageRoute(builder: (context){
-                        return MyHome();
+                        return SchoolParticipantsPage();
                       }));
                     }
                 ),

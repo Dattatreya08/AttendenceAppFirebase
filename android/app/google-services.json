@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "234832853631",
+    "project_id": "sohamacademy-bccb5",
+    "storage_bucket": "sohamacademy-bccb5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:234832853631:android:c6a4774e0c47c41a2a9d4a",
+        "android_client_info": {
+          "package_name": "com.example.soham_academy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgfRUrv7KnAd3imlq0lDyy0WSc9KSy-JY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
